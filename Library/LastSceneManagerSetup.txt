@@ -1,0 +1,5 @@
+sceneSetups:
+- path: Assets/Samples/VIVE OpenXR Plugin/2.2.0/VIVE OpenXR Samples/Samples/CustomGesture/CustomGesture.unity
+  isLoaded: 1
+  isActive: 1
+  isSubScene: 0
