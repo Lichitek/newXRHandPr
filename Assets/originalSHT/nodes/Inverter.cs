@@ -5,32 +5,35 @@ using UnityEngine.XR;
 
 public class Inverter : Node
 {
-    protected List<Node> children = new List<Node>();
+    protected Node node;
 
-    public Inverter(List<Node> nodes)
+    public Inverter(Node nodes)
     {
-        this.children = nodes;
+        this.node = nodes;
     }
 
     public override NodeState Evaluate()
     {
-        foreach (var node in children)
+
+        switch (node.Evaluate())
         {
-            switch (node.Evaluate())
-            {
-                case NodeState.PLAY:
-                    _nodeState = NodeState.PLAY;
-                    break;
-                case NodeState.RECORD:
-                    _nodeState = NodeState.BASE;
-                    break;
-                case NodeState.BASE:
-                    _nodeState = NodeState.RECORD;
-                    break;
-                default:
-                    break;
-            }
+            case NodeState.PROCESS:
+                _nodeState = NodeState.PROCESS;
+                break;
+            case NodeState.SUCCESS:
+                _nodeState = NodeState.FAILURE;
+                break;
+            case NodeState.FAILURE:
+                _nodeState = NodeState.SUCCESS;
+                break;
+            default:
+                break;
         }
+        
         return _nodeState;
+    }
+    public override IEnumerable recJoints()
+    {
+        yield return 0;
     }
 }

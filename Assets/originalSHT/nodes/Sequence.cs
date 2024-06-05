@@ -19,19 +19,23 @@ public class Sequence : Node
         {
             switch (node.Evaluate())
             {
-                case NodeState.PLAY:
+                case NodeState.PROCESS:
                     isNodeRun = true;
                     break;
-                case NodeState.RECORD:
+                case NodeState.SUCCESS:
                     break;
-                case NodeState.BASE:
-                    _nodeState = NodeState.BASE;
+                case NodeState.FAILURE:
+                    _nodeState = NodeState.FAILURE;
                     return _nodeState;
                 default:
                     break;
             }
         }
-        _nodeState = isNodeRun ? NodeState.RECORD : NodeState.PLAY;
+        _nodeState = isNodeRun ? NodeState.PROCESS : NodeState.SUCCESS;
         return _nodeState;
+    }
+    public override IEnumerable recJoints()
+    {
+        yield return 0;
     }
 }

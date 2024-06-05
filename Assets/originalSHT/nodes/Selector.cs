@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class Selector : Node
 {
@@ -17,19 +18,23 @@ public class Selector : Node
         {
             switch(node.Evaluate())
             {
-                case NodeState.PLAY:
-                    _nodeState = NodeState.PLAY;
+                case NodeState.PROCESS:
+                    _nodeState = NodeState.PROCESS;
                     return _nodeState;
-                case NodeState.RECORD: 
-                    _nodeState = NodeState.RECORD;
+                case NodeState.SUCCESS: 
+                    _nodeState = NodeState.SUCCESS;
                     return _nodeState;
-                case NodeState.BASE:
+                case NodeState.FAILURE:
                     break;
                 default: 
                     break;
             }
         }
-        _nodeState = NodeState.BASE;
+        _nodeState = NodeState.FAILURE;
         return _nodeState;
+    }
+    public override IEnumerable recJoints()
+    {
+        yield return 0;
     }
 }

@@ -17,7 +17,7 @@ public class trackingHands : MonoBehaviour
 {
     public GameObject handBones;
     [SerializeField]
-    recordingHands recHands = new recordingHands();
+    recordingHandsOld recHands = new recordingHandsOld();
 
     public string name;
     public bool str = false;
@@ -54,7 +54,7 @@ public class trackingHands : MonoBehaviour
     {
         string filepath = Application.dataPath + "/StreamingAssets/" + name + ".json";
         string handData = System.IO.File.ReadAllText(filepath);
-        recHands.frames = JsonUtility.FromJson<FramesCoordinats>(handData);
+        recHands.frames = JsonUtility.FromJson<FramesCoordinatsOld>(handData);
         print("test array loaded ok");
     }
 
