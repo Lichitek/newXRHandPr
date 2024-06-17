@@ -6,12 +6,13 @@ using VIVE.OpenXR.Toolkits.CustomGesture;
 
 public class StartWriteNode : Node
 {
-    private recordingHands RH;
+    private RecordingHands RH;
     private GameObject LHand;
     private GameObject RHand;
     private string cGName;
 
-    public StartWriteNode(recordingHands rh, GameObject handLeft, GameObject handRight, string cGName)
+
+    public StartWriteNode(RecordingHands rh, GameObject handLeft, GameObject handRight, string cGName)
     {
         this.RH = rh;
         this.LHand = handLeft;
@@ -24,15 +25,15 @@ public class StartWriteNode : Node
         if (CustomGestureDefiner.IsCurrentGestureTriiggered(cGName, CGEnums.HandFlag.Left))
         {
             LHand.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Color.yellow;
-            return NodeState.PROCESS;
+            RH.handTrack = HandFlag.Left;
+            return NodeState.SUCCESS;
         }
         else if (CustomGestureDefiner.IsCurrentGestureTriiggered(cGName, CGEnums.HandFlag.Right))
         {
             RHand.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Color.yellow;
+            RH.handTrack = HandFlag.Right;
             return NodeState.SUCCESS;
         }
-        LHand.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Color.blue;
-        RHand.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Color.blue;
         return NodeState.FAILURE;
     }
 }

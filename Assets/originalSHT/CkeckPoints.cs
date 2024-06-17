@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class checkPoints : MonoBehaviour
+public class CkeckPoints : MonoBehaviour
 {
     [SerializeField] public int idPoint;
     [SerializeField] public bool pointPassed;

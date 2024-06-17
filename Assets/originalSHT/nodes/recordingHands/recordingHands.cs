@@ -9,19 +9,21 @@ using Unity.VisualScripting;
 using VIVE.OpenXR.Samples;
 
 
-public class recordingHands : MonoBehaviour
+public class RecordingHands : MonoBehaviour
 {
+    [HideInInspector]
     [System.Serializable]
     public class ListHands
     {
         public List<JointsCoordinats> listHands = new List<JointsCoordinats>();
     }
+    [HideInInspector]
     [System.Serializable]
     public class JointsCoordinats
     {
         public List<Coordinats> jointsCoordinats = new List<Coordinats>();
     }
-
+    [HideInInspector]
     [System.Serializable]
     public class Coordinats
     {
@@ -45,34 +47,30 @@ public class recordingHands : MonoBehaviour
     [SerializeField]
     private float timerOrig;
     [SerializeField]
-    private string customGestureName;
+    private string customGestureNameStart;
     [SerializeField]
-    private int counterL;
+    private string customGestureNameEnd;
+    [SerializeField] 
+    private LineRenderer lineRendererLeft;
     [SerializeField]
-    private int counterR;
-
-
-    [SerializeField] private CustomGestureManager HGM;
-    [SerializeField] private CustomGestureDefiner GD;
-    [SerializeField] private LineRenderer lineRenderer;
-
-    bool checkCor = false; 
+    private LineRenderer lineRendererRight;
 
     private Node topNode;
+    public HandFlag handTrack;
+    public bool checkCoroutine = false; 
 
     private void Awake()
     {
-        lineRenderer.enabled = false;
-        GD = FindAnyObjectByType<CustomGestureDefiner>();
-        HGM = FindAnyObjectByType<CustomGestureManager>();
+        lineRendererLeft.enabled = false;
+        lineRendererLeft.positionCount = (int)timerOrig;
+        lineRendererRight.enabled = false;
+        lineRendererRight.positionCount = (int)timerOrig;
         leftHand.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Color.blue;
         rightHand.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Color.blue;
-        lineRenderer.positionCount = (int)timerOrig;
         for(int i = 0; i < timerOrig; i++)
         {
             framesJC.jointsCoordinats.Add(new Coordinats());
         }
-        
     }
     private void Start()
     {
@@ -80,9 +78,9 @@ public class recordingHands : MonoBehaviour
     }
     private void ConstructBehahaviourTree()
     {
-        StartWriteNode startWriteNode = new StartWriteNode(this, leftHand, rightHand, customGestureName);
-        ContinueWriteNode continueWriteNode = new ContinueWriteNode(framesJC, this, customGestureName);
-        EndWriteNode endWriteNode = new EndWriteNode(leftHand, rightHand);
+        StartWriteNode startWriteNode = new StartWriteNode(this, leftHand, rightHand, customGestureNameStart);
+        ContinueWriteNode continueWriteNode = new ContinueWriteNode(customGestureNameStart);
+        EndWriteNode endWriteNode = new EndWriteNode(this, leftHand, rightHand, customGestureNameEnd);
         Sequence mainSelector = new Sequence(new List<Node> { startWriteNode, continueWriteNode, endWriteNode });
         topNode = new Selector(new List<Node> { mainSelector });
     }
@@ -90,45 +88,62 @@ public class recordingHands : MonoBehaviour
     void Update()
     {
         topNode.Evaluate();
-        if (topNode.nodeState == NodeState.PROCESS && !checkCor)
+        if (topNode.nodeState == NodeState.PROCESS && !checkCoroutine)
         {     
-            StartCoroutine(RecJointsLeft());
-            checkCor = true;
+            StartCoroutine(RecJoints(handTrack));
+            checkCoroutine = true;
         }
     }
-    public IEnumerator RecJointsLeft()
+    public IEnumerator RecJoints(HandFlag handFlag)
     {
-        lineRenderer.enabled = true;
+        if(handFlag == HandFlag.Left)
+            lineRendererLeft.enabled = true;
+        else if (handFlag == HandFlag.Right)
+            lineRendererRight.enabled = true;
         int num = 0;
         while (num < timerOrig)
         {
-            framesJC.jointsCoordinats[num].posX = HandTracking.GetHandJointLocations(HandFlag.Left)[0].position.x;
-            framesJC.jointsCoordinats[num].posY = HandTracking.GetHandJointLocations(HandFlag.Left)[0].position.y;
-            framesJC.jointsCoordinats[num].posZ = HandTracking.GetHandJointLocations(HandFlag.Left)[0].position.z;
-            framesJC.jointsCoordinats[num].rotW = HandTracking.GetHandJointLocations(HandFlag.Left)[0].rotation.w;
-            framesJC.jointsCoordinats[num].rotX = HandTracking.GetHandJointLocations(HandFlag.Left)[0].rotation.x;
-            framesJC.jointsCoordinats[num].rotY = HandTracking.GetHandJointLocations(HandFlag.Left)[0].rotation.y;
-            framesJC.jointsCoordinats[num].rotZ = HandTracking.GetHandJointLocations(HandFlag.Left)[0].rotation.z;
-            for(int i = num; i < timerOrig; i++)
-            {
-                lineRenderer.SetPosition(i, HandTracking.GetHandJointLocations(HandFlag.Left)[0].position);
-            }            
+            framesJC.jointsCoordinats[num].posX = HandTracking.GetHandJointLocations(handFlag)[0].position.x;
+            framesJC.jointsCoordinats[num].posY = HandTracking.GetHandJointLocations(handFlag)[0].position.y;
+            framesJC.jointsCoordinats[num].posZ = HandTracking.GetHandJointLocations(handFlag)[0].position.z;
+            framesJC.jointsCoordinats[num].rotW = HandTracking.GetHandJointLocations(handFlag)[0].rotation.w;
+            framesJC.jointsCoordinats[num].rotX = HandTracking.GetHandJointLocations(handFlag)[0].rotation.x;
+            framesJC.jointsCoordinats[num].rotY = HandTracking.GetHandJointLocations(handFlag)[0].rotation.y;
+            framesJC.jointsCoordinats[num].rotZ = HandTracking.GetHandJointLocations(handFlag)[0].rotation.z;
+            if (handFlag == HandFlag.Left)
+                for (int i = num; i < timerOrig; i++)
+                {
+                    lineRendererLeft.SetPosition(i, HandTracking.GetHandJointLocations(handFlag)[0].position);
+                }
+            else if (handFlag == HandFlag.Right)
+                for (int i = num; i < timerOrig; i++)
+                {
+                    lineRendererRight.SetPosition(i, HandTracking.GetHandJointLocations(handFlag)[0].position);
+                }
             yield return new WaitForSeconds(1.0f);
             num++;
         }
-        RecFileLeft();
+        RecFile(handFlag);
     }
-    public void RecFileLeft()
+    public void RecFile(HandFlag handFlag)
     {
-        lineRenderer.enabled = false;
-        string json = JsonUtility.ToJson(framesJC);
-        string filepath = Application.dataPath + "/Resources/Left/" + fileName + ".json";
-        Debug.Log(filepath);
-        System.IO.File.WriteAllText(filepath, json);
-        Debug.Log("node2 SUCCESS");
-        checkCor = true;
+        switch (handFlag)
+        {
+            case HandFlag.Left:
+                lineRendererLeft.enabled = false;
+                string jsonLeft = JsonUtility.ToJson(framesJC);
+                string filepathLeft = Application.dataPath + "/Resources/Left/" + fileName + ".json";
+                System.IO.File.WriteAllText(filepathLeft, jsonLeft);
+                break;
+            case HandFlag.Right:
+                lineRendererRight.enabled = false;
+                string jsonRight = JsonUtility.ToJson(framesJC);
+                string filepathRight = Application.dataPath + "/Resources/Left/" + fileName + ".json";
+                System.IO.File.WriteAllText(filepathRight, jsonRight);
+                break;
+        }
     }
-    public IEnumerator RecJointsRight()
+    /*public IEnumerator RecJointsRight()
     {
         lineRenderer.enabled = true;
         int num = 0;
@@ -147,8 +162,8 @@ public class recordingHands : MonoBehaviour
             yield return new WaitForSecondsRealtime(0.5f);
         }
         RecFileRight();
-    }
-    public void RecFileRight()
+    }*/
+    /*public void RecFileRight()
     {
         lineRenderer.enabled = false;
         string json = JsonUtility.ToJson(framesJC);
@@ -156,7 +171,7 @@ public class recordingHands : MonoBehaviour
         Debug.Log(filepath);
         System.IO.File.WriteAllText(filepath, json);
         Debug.Log("node2 SUCCESS");
-    }
+    }*/
 
 
 }

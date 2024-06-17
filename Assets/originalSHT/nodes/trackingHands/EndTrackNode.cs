@@ -4,16 +4,16 @@ using UnityEngine;
 using VIVE.OpenXR.Toolkits.CustomGesture;
 using VIVE.OpenXR.Samples;
 
-public class EndWriteNode : Node
+public class EndTrackNode : Node
 {
-    private RecordingHands RH;
+    private TrackingHands tH;
     private GameObject LHand;
     private GameObject RHand;
     private string cGName;
 
-    public EndWriteNode(RecordingHands rh, GameObject handLeft, GameObject handRight, string cGName)
+    public EndTrackNode(TrackingHands tH, GameObject handLeft, GameObject handRight, string cGName)
     {
-        this.RH = rh;
+        this.tH = tH;
         this.LHand = handLeft;
         this.RHand = handRight;
         this.cGName = cGName;
@@ -21,18 +21,22 @@ public class EndWriteNode : Node
 
     public override NodeState Evaluate()
     {
-        if (CustomGestureDefiner.IsCurrentGestureTriiggered(cGName, CGEnums.HandFlag.Left))
+        if (CustomGestureDefiner.IsCurrentGestureTriiggered(cGName, CGEnums.HandFlag.Left) && tH.ckeckVariant)
         {
             LHand.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Color.blue;
-            RH.handTrack = HandFlag.None;
-            RH.checkCoroutine = false;
+            tH.currentFlag = HandFlag.None;
+            tH.currentIndex = -1;
+            tH.ckeckShow = false;
+            tH.ckeckVariant = false;
             return NodeState.SUCCESS;
         }
-        else if (CustomGestureDefiner.IsCurrentGestureTriiggered(cGName, CGEnums.HandFlag.Right))
+        else if (CustomGestureDefiner.IsCurrentGestureTriiggered(cGName, CGEnums.HandFlag.Right) && tH.ckeckVariant)
         {
             RHand.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Color.blue;
-            RH.handTrack = HandFlag.None;
-            RH.checkCoroutine = false;
+            tH.currentFlag = HandFlag.None;
+            tH.currentIndex = -1;
+            tH.ckeckShow = false;
+            tH.ckeckVariant = false;
             return NodeState.SUCCESS;
         }
         return NodeState.PROCESS;
