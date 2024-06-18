@@ -18,13 +18,13 @@ using static Unity.VisualScripting.Member;
 public class TrackingHands : MonoBehaviour
 {
     [SerializeField]
-    List<string> listHandsLeft = new List<string>();
+    public List<string> listHandsLeft = new List<string>();
     [SerializeField]
-    List<string> listHandsRight = new List<string>();
+    public List<string> listHandsRight = new List<string>();
     [SerializeField]
-    private ListHands recHandsLeft;
+    public ListHands recHandsLeft;
     [SerializeField]
-    private ListHands recHandsRight;
+    public ListHands recHandsRight;
     [SerializeField]
     private GameObject leftHand;
     [SerializeField]
@@ -44,8 +44,10 @@ public class TrackingHands : MonoBehaviour
     public HandFlag currentFlag;
     public int currentIndex;
     [SerializeField]
-    List<string> listOfScripts = new List<string>();
-    public List<GameObject> objectsScripts = new List<GameObject>();
+    public List<string> listOfScriptsLeft = new List<string>();
+    public List<string> listOfScriptsRight = new List<string>();
+    public List<GameObject> objectsScriptsLeft = new List<GameObject>();
+    public List<GameObject> objectsScriptsRight = new List<GameObject>();
     public bool ckeckShow = false;
     public bool ckeckVariant = false;
 
@@ -197,24 +199,41 @@ public class TrackingHands : MonoBehaviour
     public void PlayMethod(HandFlag handType, int index)
     {
         string subSring = "";
+        string originalString = "";
+        IEnumerable<string> set1;
+        IEnumerable<string> set2;
+        string toRemove;
+        int i;
+        string methodName;
+        Type thisType;
+        MethodInfo theMethod;
         switch (handType)
         { 
             case HandFlag.Left:
                 subSring = Application.dataPath + "/Resources/Left/";
+                originalString = listHandsLeft[index];
+                set1 = originalString.Split('/').Distinct();
+                set2 = subSring.Split('/').Distinct();
+                toRemove = ".json";
+                i = set1.Except(set2).ToList()[0].IndexOf(toRemove);
+                methodName = set1.Except(set2).ToList()[0].Remove(i, toRemove.Length);
+                thisType = objectsScriptsLeft[index].GetComponent(listOfScriptsLeft[index]).GetType();
+                theMethod = thisType.GetMethod(methodName);
+                theMethod.Invoke(objectsScriptsLeft[index].GetComponent(listOfScriptsLeft[index]), null);
                 break; 
             case HandFlag.Right:
                 subSring = Application.dataPath + "/Resources/Right/";
+                originalString = listHandsRight[index];
+                set1 = originalString.Split('/').Distinct();
+                set2 = subSring.Split('/').Distinct();
+                toRemove = ".json";
+                i = set1.Except(set2).ToList()[0].IndexOf(toRemove);
+                methodName = set1.Except(set2).ToList()[0].Remove(i, toRemove.Length);
+                thisType = objectsScriptsRight[index].GetComponent(listOfScriptsRight[index]).GetType();
+                theMethod = thisType.GetMethod(methodName);
+                theMethod.Invoke(objectsScriptsRight[index].GetComponent(listOfScriptsRight[index]), null);
                 break;
         }
-        //string s2 = Application.dataPath + "/Resources/Left/";
-        IEnumerable<string> set1 = listHandsLeft[index].Split('/').Distinct();
-        IEnumerable<string> set2 = subSring.Split('/').Distinct();
-        string toRemove = ".json";
-        int i = set1.Except(set2).ToList()[0].IndexOf(toRemove);
-        string methodName = set1.Except(set2).ToList()[0].Remove(i, toRemove.Length);
-        Type thisType = objectsScripts[index].GetComponent(listOfScripts[index]).GetType();
-        MethodInfo theMethod = thisType.GetMethod(methodName);
-        theMethod.Invoke(objectsScripts[index].GetComponent(listOfScripts[index]), null);
     }
 
 }
